@@ -15,10 +15,10 @@ A comprehensive queue management system with real-time updates, multi-domain sup
 - Backend Persistence: Node.js + Express
 - Offline Fallback
 
-## Quick Start
+**Live Demo:** [View Deployed App] (https://careflowqueue.netlify.app/)
 
-### Install Dependencies
-```bash
-npm install
-cd server && npm install && cd ..
-```
+
+## Tech Stack
+
+React, TypeScript, Vite, Tailwind CSS, Lucide Icons, Node.js, Express, Server-Sent Events (SSE), Web Audio API, Browser Notification API, BroadcastChannel API, LocalStorage
+
