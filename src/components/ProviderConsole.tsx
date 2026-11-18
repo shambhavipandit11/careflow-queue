@@ -1,4 +1,5 @@
 ﻿import { useQueue } from "../store/QueueContext";
+import { DOMAINS } from "../config/domains";
 import { Phone, CheckCircle, XCircle, Play, Pause, Users, Clock, TrendingUp } from "lucide-react";
 
 export function ProviderConsole() {
@@ -12,7 +13,15 @@ export function ProviderConsole() {
     formatETA
   } = useQueue();
 
-  const counters = Object.values(state.queues);
+  // Get current domain configuration
+  const currentDomain = DOMAINS.find(d => d.id === state.currentDomain);
+  
+  // Filter counters to only show current domain's counters
+  const currentDomainCounterNames = currentDomain?.counters.map(c => c.name) || [];
+  const counters = Object.values(state.queues).filter(q => 
+    currentDomainCounterNames.includes(q.serviceCounter)
+  );
+
   const totalWaiting = counters.reduce((sum, q) => sum + q.visitors.filter(v => v.status !== "completed" && v.status !== "no-show").length, 0);
   const totalServed = counters.reduce((sum, q) => sum + q.visitors.filter(v => v.status === "completed").length, 0);
 

@@ -13,53 +13,123 @@ app.use(express.json());
 // SSE clients
 let sseClients = [];
 
+// All 4 domains configuration matching frontend
+const DOMAINS_CONFIG = {
+  bank: {
+    counters: [
+      { name: "Teller Services", code: "T", avgServiceTime: 4 },
+      { name: "Account Opening", code: "A", avgServiceTime: 12 },
+      { name: "Loan & Investment", code: "L", avgServiceTime: 15 }
+    ],
+    demoVisitors: [
+      { name: "Alice Johnson", counter: "Teller Services", priority: "Normal" },
+      { name: "Bob Smith", counter: "Teller Services", priority: "Urgent" },
+      { name: "Carol White", counter: "Account Opening", priority: "Normal" },
+      { name: "David Brown", counter: "Loan & Investment", priority: "Normal" },
+      { name: "Emma Davis", counter: "Teller Services", priority: "Normal" }
+    ]
+  },
+  railway: {
+    counters: [
+      { name: "Ticket Booking", code: "B", avgServiceTime: 3 },
+      { name: "Refund & Cancellation", code: "R", avgServiceTime: 6 },
+      { name: "Inquiry & PNR", code: "I", avgServiceTime: 2 }
+    ],
+    demoVisitors: [
+      { name: "Rajesh Kumar", counter: "Ticket Booking", priority: "Normal" },
+      { name: "Priya Sharma", counter: "Ticket Booking", priority: "Urgent" },
+      { name: "Amit Patel", counter: "Refund & Cancellation", priority: "Normal" },
+      { name: "Sneha Gupta", counter: "Inquiry & PNR", priority: "Normal" },
+      { name: "Vikram Singh", counter: "Ticket Booking", priority: "Normal" }
+    ]
+  },
+  hospital: {
+    counters: [
+      { name: "General Consultation", code: "G", avgServiceTime: 8 },
+      { name: "Emergency Care", code: "E", avgServiceTime: 5 },
+      { name: "Pharmacy Counter", code: "P", avgServiceTime: 3 }
+    ],
+    demoVisitors: [
+      { name: "John Martinez", counter: "General Consultation", priority: "Normal" },
+      { name: "Sarah Lee", counter: "Emergency Care", priority: "Urgent" },
+      { name: "Michael Chen", counter: "Pharmacy Counter", priority: "Normal" },
+      { name: "Lisa Anderson", counter: "General Consultation", priority: "Normal" },
+      { name: "James Taylor", counter: "General Consultation", priority: "Normal" }
+    ]
+  },
+  repair: {
+    counters: [
+      { name: "Device Diagnostics", code: "D", avgServiceTime: 10 },
+      { name: "Quick Fix Counter", code: "Q", avgServiceTime: 5 },
+      { name: "Parts & Warranty", code: "W", avgServiceTime: 7 }
+    ],
+    demoVisitors: [
+      { name: "Alex Rodriguez", counter: "Device Diagnostics", priority: "Normal" },
+      { name: "Maria Garcia", counter: "Quick Fix Counter", priority: "Urgent" },
+      { name: "Kevin Wilson", counter: "Parts & Warranty", priority: "Normal" },
+      { name: "Jessica Moore", counter: "Device Diagnostics", priority: "Normal" },
+      { name: "Daniel Thompson", counter: "Quick Fix Counter", priority: "Normal" }
+    ]
+  }
+};
+
 // Load or initialize data
 function loadData() {
   try {
     if (fs.existsSync(DATA_FILE)) {
-      return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+      const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+      // Validate that all domains exist
+      if (data.queues && Object.keys(data.queues).length > 0) {
+        return data;
+      }
     }
   } catch (err) {
     console.error("Error loading data:", err);
   }
-  return initializeDefaultState();
+  return initializeAllDomains();
 }
 
-function initializeDefaultState() {
-  const queues = {};
-  const bankCounters = [
-    { name: "Teller Services", code: "T", avgServiceTime: 4 },
-    { name: "Account Opening", code: "A", avgServiceTime: 12 },
-    { name: "Loan & Investment", code: "L", avgServiceTime: 15 }
-  ];
+function initializeAllDomains() {
+  const allQueues = {};
   
-  bankCounters.forEach(counter => {
-    queues[counter.name] = {
-      serviceCounter: counter.name,
-      code: counter.code,
-      avgServiceTime: counter.avgServiceTime,
-      status: "open",
-      visitors: [],
-      nextTokenNumber: 1
-    };
+  // Initialize all 4 domains
+  Object.keys(DOMAINS_CONFIG).forEach(domainId => {
+    const domainConfig = DOMAINS_CONFIG[domainId];
+    
+    domainConfig.counters.forEach(counter => {
+      allQueues[counter.name] = {
+        serviceCounter: counter.name,
+        code: counter.code,
+        avgServiceTime: counter.avgServiceTime,
+        status: "open",
+        visitors: [],
+        nextTokenNumber: 1,
+        domain: domainId
+      };
+    });
   });
 
-  // Seed demo data
-  const demoVisitors = [
-    { name: "Alice Johnson", counter: "Teller Services", priority: "Normal" },
-    { name: "Bob Smith", counter: "Teller Services", priority: "Urgent" },
-    { name: "Carol White", counter: "Account Opening", priority: "Normal" },
-    { name: "David Brown", counter: "Loan & Investment", priority: "Normal" },
-    { name: "Emma Davis", counter: "Teller Services", priority: "Normal" },
-  ];
+  // Seed demo data for bank (default)
+  seedDomainData(allQueues, "bank");
+
+  return {
+    queues: allQueues,
+    splitDemoMode: false,
+    currentDomain: "bank"
+  };
+}
+
+function seedDomainData(queues, domainId) {
+  const domainConfig = DOMAINS_CONFIG[domainId];
+  if (!domainConfig) return;
 
   let idCounter = 1;
-  demoVisitors.forEach((demo, index) => {
+  domainConfig.demoVisitors.forEach((demo, index) => {
     const queue = queues[demo.counter];
     if (!queue) return;
 
     const visitor = {
-      id: `demo-${idCounter++}`,
+      id: `demo-${domainId}-${idCounter++}`,
       token: `${queue.code}-${queue.nextTokenNumber.toString().padStart(5, "0")}`,
       serviceCounter: demo.counter,
       counterCode: queue.code,
@@ -72,14 +142,12 @@ function initializeDefaultState() {
     queue.nextTokenNumber++;
   });
 
-  // Recalculate positions
-  Object.values(queues).forEach(recalculatePositions);
-
-  return {
-    queues,
-    splitDemoMode: false,
-    currentDomain: "bank"
-  };
+  // Recalculate positions for this domain's queues
+  domainConfig.counters.forEach(counter => {
+    if (queues[counter.name]) {
+      recalculatePositions(queues[counter.name]);
+    }
+  });
 }
 
 function saveData(data) {
@@ -148,7 +216,7 @@ app.post("/api/join", (req, res) => {
   const queue = state.queues[serviceCounter];
   
   if (!queue) {
-    return res.status(404).json({ error: "Queue not found" });
+    return res.status(404).json({ error: `Queue not found: ${serviceCounter}` });
   }
 
   const visitor = {
@@ -196,7 +264,7 @@ app.post("/api/call-next", (req, res) => {
   const queue = state.queues[serviceCounter];
   
   if (!queue) {
-    return res.status(404).json({ error: "Queue not found" });
+    return res.status(404).json({ error: `Queue not found: ${serviceCounter}` });
   }
 
   if (queue.status === "paused") {
@@ -277,7 +345,7 @@ app.post("/api/toggle-counter", (req, res) => {
   const queue = state.queues[serviceCounter];
   
   if (!queue) {
-    return res.status(404).json({ error: "Queue not found" });
+    return res.status(404).json({ error: `Queue not found: ${serviceCounter}` });
   }
 
   queue.status = queue.status === "open" ? "paused" : "open";
@@ -289,7 +357,7 @@ app.post("/api/toggle-counter", (req, res) => {
 });
 
 app.post("/api/reset", (req, res) => {
-  state = initializeDefaultState();
+  state = initializeAllDomains();
   saveData(state);
   broadcastUpdate(state);
   res.json({ success: true });
@@ -298,4 +366,5 @@ app.post("/api/reset", (req, res) => {
 app.listen(PORT, () => {
   console.log(`QueueFlow backend running on http://localhost:${PORT}`);
   console.log(`SSE stream available at http://localhost:${PORT}/api/stream`);
+  console.log(`Initialized with ${Object.keys(state.queues).length} counters across 4 domains`);
 });
