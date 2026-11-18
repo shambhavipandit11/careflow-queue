@@ -1,32 +1,24 @@
-# React + TypeScript + Vite
+﻿# QueueFlow - Smart Virtual Queue Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A comprehensive queue management system with real-time updates, multi-domain support, and backend persistence.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Multi-Domain Support: Bank, Railway, Hospital, Repair Service
+- Real-Time Sync: SSE + BroadcastChannel + localStorage fallback
+- Priority Queue: Urgent visitors jump ahead
+- ETA Calculation: Dynamic wait time estimates
+- Multi-Modal Notifications: Audio + Browser + Toast
+- Split Demo Mode: Side-by-side views
+- Counter Controls: Open/Pause
+- No-Show Management
+- Backend Persistence: Node.js + Express
+- Offline Fallback
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### Install Dependencies
+```bash
+npm install
+cd server && npm install && cd ..
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.

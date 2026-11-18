@@ -1,0 +1,73 @@
+{
+  "queues": {
+    "Teller Services": {
+      "serviceCounter": "Teller Services",
+      "code": "T",
+      "avgServiceTime": 4,
+      "status": "open",
+      "visitors": [
+        {
+          "id": "demo-2",
+          "token": "T-00002",
+          "serviceCounter": "Teller Services",
+          "counterCode": "T",
+          "priority": "Urgent",
+          "registeredAt": 1794993225621,
+          "status": "approaching",
+          "position": 1
+        },
+        {
+          "id": "demo-5",
+          "token": "T-00003",
+          "serviceCounter": "Teller Services",
+          "counterCode": "T",
+          "priority": "Normal",
+          "registeredAt": 1794993405621,
+          "status": "approaching",
+          "position": 2
+        }
+      ],
+      "nextTokenNumber": 4
+    },
+    "Account Opening": {
+      "serviceCounter": "Account Opening",
+      "code": "A",
+      "avgServiceTime": 12,
+      "status": "open",
+      "visitors": [
+        {
+          "id": "demo-3",
+          "token": "A-00001",
+          "serviceCounter": "Account Opening",
+          "counterCode": "A",
+          "priority": "Normal",
+          "registeredAt": 1794993285621,
+          "status": "called",
+          "position": 1
+        }
+      ],
+      "nextTokenNumber": 2
+    },
+    "Loan & Investment": {
+      "serviceCounter": "Loan & Investment",
+      "code": "L",
+      "avgServiceTime": 15,
+      "status": "open",
+      "visitors": [
+        {
+          "id": "demo-4",
+          "token": "L-00001",
+          "serviceCounter": "Loan & Investment",
+          "counterCode": "L",
+          "priority": "Normal",
+          "registeredAt": 1794993345621,
+          "status": "waiting",
+          "position": 1
+        }
+      ],
+      "nextTokenNumber": 2
+    }
+  },
+  "splitDemoMode": false,
+  "currentDomain": "bank"
+}
